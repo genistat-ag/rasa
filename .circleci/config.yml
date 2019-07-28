@@ -1,0 +1,43 @@
+version: 2
+jobs:
+  build:
+    machine: true
+    environment:
+      DOCKER_REGISTRY: docker.genistat.ch
+      PRODUCTION_TAG: production
+      PRODUCTION_BRANCH: master
+
+      # Following need to be defined in the CircleCI project setting
+      # GIT_CRYPT_KEY (use 'git-crypt export-key crypt-key && base64 crypt-key && rm crypt-key')
+
+      # Following are provided by a global (company) context in CircleCI and are available to all projects
+      # DOCKER_REGISTRY_USER
+      # DOCKER_REGISTRY_KEY
+      # KUBE_CONFIG (use base64 encoding of a merged (staging and production) kubeconfig file from rancher
+    steps:
+      - checkout
+      - run:
+          name: Sign into docker registry
+          command: |
+            docker login -u $DOCKER_REGISTRY_USER -p $DOCKER_REGISTRY_KEY $DOCKER_REGISTRY
+      - run:
+          name: Build docker
+          command: |
+            for LANG in en de; do
+              docker build ./ -f ./docker/Dockerfile_pretrained_embeddings_spacy_$LANG -t $DOCKER_REGISTRY/rasa-$LANG:$PRODUCTION_TAG
+            done
+      - run:
+          name: Publish docker
+          command: |
+            if [[ "$CIRCLE_BRANCH" == $PRODUCTION_BRANCH ]]; then
+              for LANG in en de; do
+                docker push $DOCKER_REGISTRY/rasa-$LANG:$PRODUCTION_TAG
+              done
+            fi
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - build:
+          context: deployment
