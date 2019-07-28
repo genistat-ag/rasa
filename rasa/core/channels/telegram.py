@@ -1,19 +1,16 @@
+# Standard Library
 import logging
+from typing import Any, Dict, List, Optional, Text
+
+# Third Party
+from telegram import (Bot, InlineKeyboardButton, InlineKeyboardMarkup,
+                      KeyboardButton, ParseMode, ReplyKeyboardMarkup, Update)
+
+# Current Project
+from rasa.core.channels.channel import InputChannel, OutputChannel, UserMessage
+from rasa.core.constants import INTENT_MESSAGE_PREFIX, USER_INTENT_RESTART
 from sanic import Blueprint, response
 from sanic.request import Request
-from telegram import (
-    Bot,
-    InlineKeyboardButton,
-    Update,
-    InlineKeyboardMarkup,
-    KeyboardButton,
-    ReplyKeyboardMarkup,
-)
-from telegram.ParseMode import MARKDOWN
-from typing import Dict, Text, Any, List, Optional
-
-from rasa.core.channels.channel import InputChannel, UserMessage, OutputChannel
-from rasa.core.constants import INTENT_MESSAGE_PREFIX, USER_INTENT_RESTART
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +29,7 @@ class TelegramOutput(Bot, OutputChannel):
         self, recipient_id: Text, text: Text, **kwargs: Any
     ) -> None:
         for message_part in text.split("\n\n"):
-            self.send_message(recipient_id, message_part, parse_mode=MARKDOWN)
+            self.send_message(recipient_id, message_part, parse_mode=ParseMode.MARKDOWN)
 
     async def send_image_url(
         self, recipient_id: Text, image: Text, **kwargs: Any
@@ -90,7 +87,7 @@ class TelegramOutput(Bot, OutputChannel):
             )
             return
 
-        self.send_message(recipient_id, text, reply_markup=reply_markup, parse_mode=MARKDOWN)
+        self.send_message(recipient_id, text, reply_markup=reply_markup, parse_mode=ParseMode.MARKDOWN)
 
     async def send_custom_json(
         self, recipient_id: Text, json_message: Dict[Text, Any], **kwargs: Any
