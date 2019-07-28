@@ -9,6 +9,7 @@ from telegram import (
     KeyboardButton,
     ReplyKeyboardMarkup,
 )
+from telegram.ParseMode import MARKDOWN
 from typing import Dict, Text, Any, List, Optional
 
 from rasa.core.channels.channel import InputChannel, UserMessage, OutputChannel
@@ -31,7 +32,7 @@ class TelegramOutput(Bot, OutputChannel):
         self, recipient_id: Text, text: Text, **kwargs: Any
     ) -> None:
         for message_part in text.split("\n\n"):
-            self.send_message(recipient_id, message_part)
+            self.send_message(recipient_id, message_part, parse_mode=MARKDOWN)
 
     async def send_image_url(
         self, recipient_id: Text, image: Text, **kwargs: Any
@@ -89,7 +90,7 @@ class TelegramOutput(Bot, OutputChannel):
             )
             return
 
-        self.send_message(recipient_id, text, reply_markup=reply_markup)
+        self.send_message(recipient_id, text, reply_markup=reply_markup, parse_mode=MARKDOWN)
 
     async def send_custom_json(
         self, recipient_id: Text, json_message: Dict[Text, Any], **kwargs: Any
